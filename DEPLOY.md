@@ -47,7 +47,7 @@ Let op: gebruik je liever een andere bundle id, pas dan ook `PRODUCT_BUNDLE_IDEN
 De TestFlight-upload vindt alleen een thuis als er een app-record bestaat:
 
 1. Ga naar [App Store Connect → My Apps](https://appstoreconnect.apple.com/apps) en klik op **+** → **New App**.
-2. Vul in: **Name** — dit is de naam in de App Store en moet **uniek** zijn; `Streepje` is bezet, dus kies bijv. `Streepje Lijstje` of `Streepje — Boodschappenlijst`. **Primary Language** Nederlands, **Bundle ID** `nl.pbijkerk.streepje` (uit stap 2), **SKU** bijv. `streepje`.
+2. Vul in: **Name** — dit is de naam in de App Store en moet **uniek** zijn; `Streepje` is bezet. Voorgestelde naam: `Pluk` (bij controle in nov. 2025 nog niet in gebruik; Apple valideert de uniekheid definitief op dit punt). Mocht die tussentijds bezet zijn, kies dan bijv. `Pluk Boodschappen` of `Streepje Lijstje`. **Primary Language** Nederlands, **Bundle ID** `nl.pbijkerk.streepje` (uit stap 2), **SKU** bijv. `streepje`.
 3. De naam die gebruikers onder het app-icoontje zien (op het thuisscherm) is onafhankelijk hiervan en blijft gewoon `Streepje` — die hoeft niet uniek te zijn.
 
 ### 6. Secrets instellen
