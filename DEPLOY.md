@@ -17,21 +17,39 @@ Zolang de secrets ontbreken, stopt de workflow netjes met een duidelijke foutmel
    base64 -i AuthKey_XXXXXX.p8 | pbcopy
    ```
 
-### 2. Distributie-certificaat
+### 2. App ID (bundle id) registreren
+De bundle id `nl.pbijkerk.streepje` moet eerst bestaan als App ID, anders kun je er geen provisioning profile voor maken:
+
+1. Ga naar [developer.apple.com → Certificates, Identifiers & Profiles → Identifiers](https://developer.apple.com/account/resources/identifiers/list).
+2. Klik op **+** → kies **App IDs** → **App** → **Continue**.
+3. Vul in:
+   - **Description**: `Streepje`
+   - **Bundle ID**: kies **Explicit** en vul `nl.pbijkerk.streepje` in
+4. Vink onder **Capabilities** niets extra's aan (Streepje heeft geen speciale capabilities) en klik **Register**.
+
+Let op: gebruik je liever een andere bundle id, pas dan ook `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` én het provisioning profile in `.github/workflows/testflight.yml` aan.
+
+### 3. Distributie-certificaat
 1. In Xcode: **Settings → Accounts → je team → Manage Certificates → +** en kies **Apple Distribution** (of maak 'm via developer.apple.com).
 2. Exporteer het certificaat uit de Sleutelhouder als `.p12` (instellingen: wachtwoord kies je zelf) en encodeer:
    ```bash
    base64 -i certificate.p12 | pbcopy
    ```
 
-### 3. Provisioning profile (App Store)
-1. Ga naar [developer.apple.com → Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/profiles/list) en maak een **App Store**-provisioning profile voor de bundle id `nl.pbijkerk.streepje`.
+### 4. Provisioning profile (App Store)
+1. Ga naar [developer.apple.com → Certificates, Identifiers & Profiles → Profiles](https://developer.apple.com/account/resources/profiles/list) en maak een **App Store**-provisioning profile voor de App ID `nl.pbijkerk.streepje` (uit stap 2).
 2. Download het en decodeer naar base64:
    ```bash
    base64 -i Streepje_AppStore.mobileprovision | pbcopy
    ```
 
-### 4. Secrets instellen
+### 5. App aanmaken in App Store Connect
+De TestFlight-upload vindt alleen een thuis als er een app-record bestaat:
+
+1. Ga naar [App Store Connect → My Apps](https://appstoreconnect.apple.com/apps) en klik op **+** → **New App**.
+2. Vul in: **Name** `Streepje`, **Primary Language** Nederlands, **Bundle ID** `nl.pbijkerk.streepje` (uit stap 2), **SKU** bijv. `streepje`.
+
+### 6. Secrets instellen
 Zet in **GitHub → Settings → Secrets and variables → Actions** (delen van deze waarden nooit hier in de chat):
 
 | Secret | Waarde |
