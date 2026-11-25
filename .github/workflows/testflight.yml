@@ -111,7 +111,8 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER" \
-            MARKETING_VERSION=${GITHUB_REF_NAME#v}
+            MARKETING_VERSION=${GITHUB_REF_NAME#v} \
+            CURRENT_PROJECT_VERSION=$GITHUB_RUN_NUMBER
 
       - name: Export IPA
         run: |

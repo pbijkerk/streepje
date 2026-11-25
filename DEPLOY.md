@@ -68,6 +68,8 @@ Zet in **GitHub → Settings → Secrets and variables → Actions** (delen van 
 
 Elke tag-push levert automatisch een TestFlight-build af. Gebruik per release een **nieuwe** tagnaam (`v0.1.2`, `v0.1.3`, …): een verwijderde en opnieuw gepushte tag met dezelfde naam/commit triegert géén nieuwe workflow-run. De allereerste build moet je in App Store Connect even vrijgeven aan jezelf via **TestFlight → Builds → Testers**.
 
-Voor nieuwe versies: verhoog de marketingversie niet handmatig — de workflow haalt die automatisch uit de tagnaam.
+Voor nieuwe versies: verhoog de marketingversie niet handmatig — de workflow haalt die automatisch uit de tagnaam. Het buildnummer neemt automatisch toe (gelijk aan het nummer van de Actions-run), dus elke tag-push hoeft niets te houden van het vorige.
+
+Opmerking: Apple stuurt soms een ITMS-90725-e-mail ("SDK version issue") als informatieve waarschuwing over toekomstige SDK-vereisen — dat is geen afkeuring en de build werkt gewoon in TestFlight.
 
 De build werkt met Xcode 26 (iOS 26 SDK, verplicht voor App Store-uploads); de workflow draait op de `macos-26`-runner — die kan druk zijn, dus een langere queue is normaal.
