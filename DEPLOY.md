@@ -38,7 +38,7 @@ Let op: gebruik je liever een andere bundle id, pas dan ook `PRODUCT_BUNDLE_IDEN
 
 ### 4. Provisioning profile (App Store)
 1. Ga naar [developer.apple.com → Certificates, Identifiers & Profiles → Profiles](https://developer.apple.com/account/resources/profiles/list) en maak een **App Store**-provisioning profile voor de App ID `nl.pbijkerk.streepje` (uit stap 2).
-2. Download het en decodeer naar base64:
+2. Download het en encodeer naar base64:
    ```bash
    base64 -i Streepje_AppStore.mobileprovision | pbcopy
    ```
