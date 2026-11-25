@@ -20,16 +20,8 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Build
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project Streepje.xcodeproj \
-            -scheme Streepje \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            build 2>&1 | xcbeautify
+      - name: Debug list
+        run: xcodebuild -project Streepje.xcodeproj -list
 
       - name: Unit tests
         run: |
