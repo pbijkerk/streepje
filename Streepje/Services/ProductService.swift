@@ -9,7 +9,8 @@ enum ProductLookup {
     }
 
     static func name(for barcode: String) async -> String? {
-        if let cached = cache()[barcode] { return cached }
+        var productCache = cache()
+        if let cached = productCache[barcode] { return cached }
 
         guard let url = URL(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json") else {
             return nil
@@ -26,8 +27,8 @@ enum ProductLookup {
             guard payload.status == 1, let product = payload.product else { return nil }
             let name = product.bestName
             guard let name, !name.isEmpty else { return nil }
-            cache()[barcode] = name
-            save(cache())
+            productCache[barcode] = name
+            save(productCache)
             return name
         } catch {
             return nil
