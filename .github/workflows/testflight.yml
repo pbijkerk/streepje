@@ -130,6 +130,7 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           xcrun altool --upload-app \
+            --type ios \
             -f $RUNNER_TEMP/export/Streepje.ipa \
             --apiKey $ASC_KEY_ID \
             --apiIssuer $ASC_ISSUER_ID
