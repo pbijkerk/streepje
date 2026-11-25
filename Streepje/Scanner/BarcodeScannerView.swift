@@ -30,10 +30,9 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
             }
 
             let session = AVCaptureSession()
-            guard session.canAddInput(input), session.canAddOutput(AVCaptureMetadataOutput.self) else { return }
-            session.addInput(input)
-
             let output = AVCaptureMetadataOutput()
+            guard session.canAddInput(input), session.canAddOutput(output) else { return }
+            session.addInput(input)
             session.addOutput(output)
             output.setMetadataObjectsDelegate(self, queue: .main)
             output.metadataObjectTypes = [.ean8, .ean13, .upce, .code128]
