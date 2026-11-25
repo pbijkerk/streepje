@@ -91,6 +91,12 @@ jobs:
           </plist>
           __EOF__
 
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
       - name: Archive
         env:
           DEVELOPMENT_TEAM_ID: ${{ secrets.DEVELOPMENT_TEAM_ID }}

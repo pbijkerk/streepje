@@ -17,11 +17,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: xcodegen generate
+
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Debug list
-        run: xcodebuild -project Streepje.xcodeproj -list
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Streepje.xcodeproj \
+            -scheme Streepje \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | xcbeautify
 
       - name: Unit tests
         run: |

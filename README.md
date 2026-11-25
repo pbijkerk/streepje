@@ -15,8 +15,9 @@ Streepjescode lezer — een iOS-app die een boodschappenlijstje opbouwt door pro
 
 - Xcode 16 of nieuwer
 - iOS 17+
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 
-Open `Streepje.xcodeproj` in Xcode en run op een fysieke iPhone (de simulator heeft geen camera; scannen werkt alleen op een toestel).
+Genereer eerst het project: `xcodegen generate`. Open daarna `Streepje.xcodeproj` in Xcode en run op een fysieke iPhone (de simulator heeft geen camera; scannen werkt alleen op een toestel).
 
 ## CI
 
