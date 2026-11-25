@@ -30,3 +30,14 @@ jobs:
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             build 2>&1 | xcbeautify
+
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Streepje.xcodeproj \
+            -scheme Streepje \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            test 2>&1 | xcbeautify

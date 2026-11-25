@@ -35,12 +35,12 @@ enum ProductLookup {
         }
     }
 
-    private struct OFFResponse: Decodable {
+    struct OFFResponse: Decodable {
         let status: Int?
         let product: OFFProduct?
     }
 
-    private struct OFFProduct: Decodable {
+    struct OFFProduct: Decodable {
         let productName: String?
         let productNameNl: String?
         let brands: String?

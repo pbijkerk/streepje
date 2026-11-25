@@ -13,6 +13,10 @@ final class ShoppingListStore: ObservableObject {
         load()
     }
 
+    init(seedItems: [ShoppingItem]) {
+        items = seedItems
+    }
+
     func add(barcode: String, name: String) {
         if let index = items.firstIndex(where: { $0.barcode == barcode }) {
             items[index].quantity += 1

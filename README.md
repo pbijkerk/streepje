@@ -20,7 +20,8 @@ Open `Streepje.xcodeproj` in Xcode en run op een fysieke iPhone (de simulator he
 
 ## CI
 
-`.github/workflows/ios.yml` bouwt het project bij elke push/PR op een macOS-runner met xcodebuild (iOS Simulator, zonder code signing).
+- **`.github/workflows/ios.yml`** — bouwt en test bij elke push/PR op een macOS-runner (build voor iOS Simulator, daarna unit-tests op een iPhone 16-simulator, zonder code signing).
+- **`.github/workflows/testflight.yml`** — archiveert, tekent en uploadt naar TestFlight bij een `v*`-tag. Vereist eenmalig secrets; zie [DEPLOY.md](DEPLOY.md).
 
 ## Data
 
