@@ -40,7 +40,7 @@ final class PantryMigrationTests: XCTestCase {
         let store = try PantryStore(inMemory: true)
         // Handmatig toegevoegde producten hebben een lege barcode.
         let legacy = [
-            ShoppingItem(barcode: "", name: "Knäckebr\u00f6d"),
+            ShoppingItem(barcode: "", name: "Knäckebröd"),
             ShoppingItem(barcode: "", name: "Balsamico")
         ]
 
