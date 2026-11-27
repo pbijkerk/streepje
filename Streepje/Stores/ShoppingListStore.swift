@@ -44,6 +44,12 @@ final class ShoppingListStore: ObservableObject {
         save()
     }
 
+    /// Verwijdert alle regels met deze barcode (gebruikt door "Aanvullen in voorraad").
+    func remove(barcode: String) {
+        items.removeAll { $0.barcode == barcode }
+        save()
+    }
+
     func clearChecked() {
         items.removeAll { $0.isChecked }
         save()

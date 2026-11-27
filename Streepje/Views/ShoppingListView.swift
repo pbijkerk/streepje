@@ -1,8 +1,8 @@
 import SwiftUI
 
 @MainActor
-struct ContentView: View {
-    @StateObject private var store = ShoppingListStore()
+struct ShoppingListView: View {
+    @EnvironmentObject var list: ShoppingListStore
     @State private var isScanning = false
     @State private var isNamingProduct = false
     @State private var pendingBarcode: String?
@@ -11,18 +11,18 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if store.items.isEmpty {
+                if list.items.isEmpty {
                     emptyState
                 } else {
-                    list
+                    itemsList
                 }
             }
-            .navigationTitle("Streepje")
+            .navigationTitle("Lijst")
             .toolbar {
-                if store.items.contains(where: \.isChecked) {
+                if list.items.contains(where: \.isChecked) {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Wis aangevinkte") {
-                            store.clearChecked()
+                            list.clearChecked()
                         }
                     }
                 }
@@ -53,9 +53,9 @@ struct ContentView: View {
                 Button("Opslaan") {
                     let name = productNameInput.trimmingCharacters(in: .whitespacesAndNewlines)
                     if let barcode = pendingBarcode, !name.isEmpty {
-                        store.add(barcode: barcode, name: name)
+                        list.add(barcode: barcode, name: name)
                     } else if pendingBarcode == nil, !name.isEmpty {
-                        store.add(barcode: "", name: name)
+                        list.add(barcode: "", name: name)
                     }
                     pendingBarcode = nil
                     productNameInput = ""
@@ -83,32 +83,32 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var list: some View {
+    private var itemsList: some View {
         List {
-            ForEach(store.items) { item in
+            ForEach(list.items) { item in
                 ListItemRow(item: item) {
-                    store.toggle(item)
+                    list.toggle(item)
                 } onIncrease: {
-                    store.changeQuantity(of: item, delta: 1)
+                    list.changeQuantity(of: item, delta: 1)
                 } onDecrease: {
-                    store.changeQuantity(of: item, delta: -1)
+                    list.changeQuantity(of: item, delta: -1)
                 }
             }
             .onDelete { offsets in
-                store.delete(at: offsets)
+                list.delete(at: offsets)
             }
         }
     }
 
     private func handleScan(_ code: String) {
         if let cached = ProductLookup.cachedName(for: code) {
-            store.add(barcode: code, name: cached)
+            list.add(barcode: code, name: cached)
             return
         }
 
         Task {
             if let name = await ProductLookup.name(for: code) {
-                store.add(barcode: code, name: name)
+                list.add(barcode: code, name: name)
             } else {
                 pendingBarcode = code
                 productNameInput = ""
@@ -142,5 +142,8 @@ private struct ScannerSheet: View {
 }
 
 #Preview {
-    ContentView()
+    ShoppingListView()
+        .environmentObject(ShoppingListStore(seedItems: [
+            ShoppingItem(barcode: "8710398723456", name: "Hagelslag puur")
+        ]))
 }

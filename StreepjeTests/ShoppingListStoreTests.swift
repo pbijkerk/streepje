@@ -69,6 +69,17 @@ final class ShoppingListStoreTests: XCTestCase {
         XCTAssertEqual(store.items.map(\.name), ["Brood"])
     }
 
+    func testRemoveDeletesItemsWithBarcode() {
+        let first = ShoppingItem(barcode: "111", name: "Melk")
+        let second = ShoppingItem(barcode: "222", name: "Brood")
+        let duplicate = ShoppingItem(barcode: "111", name: "Melk")
+        let store = ShoppingListStore(seedItems: [first, second, duplicate])
+
+        store.remove(barcode: "111")
+
+        XCTAssertEqual(store.items.map(\.name), ["Brood"])
+    }
+
     func testDeleteRemovesItems() {
         let first = ShoppingItem(barcode: "111", name: "Melk")
         let second = ShoppingItem(barcode: "222", name: "Brood")
