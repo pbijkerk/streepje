@@ -5,7 +5,7 @@ import SwiftUI
 /// Kleuren van de balk: groen = ruim voldoende, oranje = onder de drempel (laag),
 /// rood = helemaal op.
 struct StockRow: View {
-    @ObservedObject var item: PantryItem
+    let item: PantryItem
     var onIncrease: () -> Void
     var onDecrease: () -> Void
 

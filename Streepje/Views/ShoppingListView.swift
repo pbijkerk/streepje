@@ -14,7 +14,7 @@ struct ShoppingListView: View {
                 if list.items.isEmpty {
                     emptyState
                 } else {
-                    list
+                    itemsList
                 }
             }
             .navigationTitle("Lijst")
@@ -83,7 +83,7 @@ struct ShoppingListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var list: some View {
+    private var itemsList: some View {
         List {
             ForEach(list.items) { item in
                 ListItemRow(item: item) {
