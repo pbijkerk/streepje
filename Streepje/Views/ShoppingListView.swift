@@ -8,6 +8,8 @@ struct ShoppingListView: View {
     @State private var isNamingProduct = false
     @State private var pendingBarcode: String?
     @State private var productNameInput = ""
+    @State private var toonKopieerBevestiging = false
+    @State private var exportFout: String?
 
     var body: some View {
         NavigationStack {
@@ -19,6 +21,19 @@ struct ShoppingListView: View {
                 }
             }
             .navigationTitle("Lijst")
+            .alert("Gekopieerd", isPresented: $toonKopieerBevestiging) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("De boodschappenlijst staat op je klembord.")
+            }
+            .alert("Exporteren mislukt", isPresented: Binding(
+                get: { exportFout != nil },
+                set: { if !$0 { exportFout = nil } }
+            )) {
+                Button("OK", role: .cancel) { exportFout = nil }
+            } message: {
+                Text(exportFout ?? "")
+            }
             .toolbar {
                 if list.items.contains(where: \.isChecked) {
                     ToolbarItem(placement: .navigationBarLeading) {
@@ -28,6 +43,7 @@ struct ShoppingListView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    exportMenu
                     Button {
                         pendingBarcode = nil
                         productNameInput = ""
@@ -68,6 +84,49 @@ struct ShoppingListView: View {
             } message: {
                 Text("Deze code staat niet in de productdatabase. Vul zelf een naam in.")
             }
+        }
+    }
+
+    // MARK: - Export (fase 4)
+
+    private var exportMenu: some View {
+        Menu {
+            Button {
+                kopieerVoorSupermarkt()
+            } label: {
+                Label("Kopieer voor supermarkt", systemImage: "doc.on.doc")
+            }
+            ShareLink(item: ExportBuilder.volledigeTekst(items: list.items)) {
+                Label("Deel lijst…", systemImage: "square.and.arrow.up")
+            }
+            Button {
+                Task {
+                    await exportNaarHerinneringen()
+                }
+            } label: {
+                Label("Naar Herinneringen", systemImage: "checklist")
+            }
+        } label: {
+            Image(systemName: "square.and.arrow.up")
+        }
+        .disabled(!ExportBuilder.heeftOpenItems(list.items))
+        .accessibilityLabel("Lijst exporteren")
+    }
+
+    private func kopieerVoorSupermarkt() {
+        let tekst = ExportBuilder.supermarktTekst(items: list.items)
+        guard !tekst.isEmpty else { return }
+        UIPasteboard.general.string = tekst
+        Haptics.light()
+        toonKopieerBevestiging = true
+    }
+
+    private func exportNaarHerinneringen() async {
+        do {
+            try await RemindersExporter.export(items: list.items)
+            Haptics.light()
+        } catch {
+            exportFout = error.localizedDescription
         }
     }
 
