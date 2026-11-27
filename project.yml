@@ -17,6 +17,7 @@ targets:
       path: Streepje/Info.plist
       properties:
         NSCameraUsageDescription: Streepje gebruikt de camera om streepjescodes van producten te scannen.
+        NSRemindersFullAccessUsageDescription: Streepje wil de boodschappenlijst toevoegen aan je Herinneringen.
         UILaunchScreen: {}
     settings:
       base:
