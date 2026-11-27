@@ -25,12 +25,14 @@ enum PantryEngine {
     /// Bepaalt na een mutatie of er iets automatisch moet gebeuren.
     ///
     /// Regels (volgens de review op issue #2):
-    /// - Zakt de voorraad op of onder de drempel én stond hij dat nog niet → item op de boodschappenlijst.
-    /// - Komt de voorraad weer boven de drempel → de laag-status verdwijnt, maar het item
-    ///   blijft op de boodschappenlijst (verwijderen gebeurt alleen bij expliciet aanvullen).
+    /// - Zakt de voorraad **onder** de drempel (`quantity < threshold`) én stond hij dat nog
+    ///   niet → item op de boodschappenlijst. Precies op de drempel = nog voldoende.
+    ///   Drempel 0 schakelt automatische aanvulling volledig uit.
+    /// - Komt de voorraad weer op of boven de drempel → de laag-status verdwijnt, maar het
+    ///   item blijft op de boodschappenlijst (verwijderen gebeurt alleen bij expliciet aanvullen).
     /// - Zit het item al op de lijst → geen duplicaat.
     static func apply(_ mutation: StockMutation, at now: Date = Date()) -> (newLowSince: Date?, action: PantryListAction?) {
-        let isLow = mutation.newQuantity <= mutation.threshold
+        let isLow = mutation.newQuantity < mutation.threshold
 
         if !isLow {
             // Boven de drempel: laag-status opheffen, verder niets doen.

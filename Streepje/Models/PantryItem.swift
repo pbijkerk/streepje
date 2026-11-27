@@ -68,7 +68,8 @@ final class PantryItem {
     var quantity: Int = 0
     /// Er is één verpakking aangebroken.
     var isOpen: Bool = false
-    /// IJzeren voorraad: bij `quantity <= threshold` komt het product op de boodschappenlijst.
+    /// IJzeren voorraad: bij `quantity < threshold` komt het product op de boodschappenlijst.
+    /// Drempel 0 schakelt automatische aanvulling uit.
     var threshold: Int = 1
     /// Standaard aanvulhoeveelheid waarnaar "Aanvullen in voorraad" reset.
     var defaultStock: Int = 1
@@ -101,6 +102,6 @@ final class PantryItem {
         set { categoryRaw = newValue.rawValue }
     }
 
-    /// Staat de voorraad op of onder de ijzeren voorraad?
-    var isLow: Bool { quantity <= threshold }
+    /// Staat de voorraad onder de ijzeren voorraad?
+    var isLow: Bool { quantity < threshold }
 }

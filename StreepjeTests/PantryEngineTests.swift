@@ -20,15 +20,22 @@ final class PantryEngineTests: XCTestCase {
         )
     }
 
-    func testCrossingThresholdAddsToShoppingList() {
-        let result = PantryEngine.apply(mutation(quantity: 1, threshold: 1), at: now)
+    func testBelowThresholdAddsToShoppingList() {
+        let result = PantryEngine.apply(mutation(quantity: 1, threshold: 2), at: now)
 
         XCTAssertNotNil(result.newLowSince)
         XCTAssertEqual(result.action, .addedToShoppingList(
             barcode: "8710398723456",
             name: "Hagelslag puur",
-            reason: "Voorraad onder de ijzeren voorraad (1 over, drempel 1)"
+            reason: "Voorraad onder de ijzeren voorraad (1 over, drempel 2)"
         ))
+    }
+
+    func testExactlyAtThresholdDoesNotTrigger() {
+        let result = PantryEngine.apply(mutation(quantity: 1, threshold: 1), at: now)
+
+        XCTAssertNil(result.newLowSince, "Precies op de drempel = nog voldoende")
+        XCTAssertNil(result.action)
     }
 
     func testZeroStockAlsoTriggers() {
