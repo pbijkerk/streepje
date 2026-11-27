@@ -13,12 +13,23 @@ targets:
     platform: iOS
     sources:
       - path: Streepje
+    entitlements:
+      path: Streepje/Streepje.entitlements
+      properties:
+        com.apple.developer.icloud-services: [CloudKit]
+        com.apple.developer.icloud-container-identifiers: [iCloud.nl.pbijkerk.streepje]
+        aps-environment: development
+    dependencies:
+      - target: StreepjeWidgets
     info:
       path: Streepje/Info.plist
       properties:
         NSCameraUsageDescription: Streepje gebruikt de camera om streepjescodes van producten te scannen.
         NSRemindersFullAccessUsageDescription: Streepje wil de boodschappenlijst toevoegen aan je Herinneringen.
         ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: nl.pbijkerk.streepje
+            CFBundleURLSchemes: [streepje]
         UILaunchScreen: {}
     settings:
       base:
@@ -28,6 +39,21 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  StreepjeWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: StreepjeWidgets
+    info:
+      path: StreepjeWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Streepje
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: nl.pbijkerk.streepje.widgets
+        SKIP_INSTALL: YES
   StreepjeTests:
     type: bundle.unit-test
     platform: iOS

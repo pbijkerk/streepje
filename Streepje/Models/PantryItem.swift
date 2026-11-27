@@ -57,11 +57,14 @@ enum PantryCategory: String, CaseIterable, Codable, Identifiable {
 /// (geen percentages), drempel ("ijzeren voorraad") in stuks, en één "aangebroken"-vlag
 /// in plaats van een percentuele slider.
 ///
-/// Let op: `.unique` op barcode is handig op één apparaat, maar werkt niet samen met
-/// CloudKit-synchronisatie (fase 5) — bij die migratie vervalt dit attribuut.
+/// Let op: CloudKit-synchronisatie (fase 5) stelt twee eisen aan het model, die hier
+/// beide nageleefd worden:
+/// 1. Geen `.unique`-attributen (ongelijkheid wordt in de store afgedwongen via
+///    `item(withBarcode:)` vóór insert).
+/// 2. Alle eigenschappen optioneel óf met een defaultwaarde.
 @Model
 final class PantryItem {
-    @Attribute(.unique) var barcode: String
+    var barcode: String = ""
     var name: String = ""
     var categoryRaw: String = PantryCategory.household.rawValue
     /// Aantal verpakkingen op voorraad (0 = op).
