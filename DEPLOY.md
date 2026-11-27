@@ -73,3 +73,13 @@ Voor nieuwe versies: verhoog de marketingversie niet handmatig — de workflow h
 Opmerking: Apple stuurt soms een ITMS-90725-e-mail ("SDK version issue") als informatieve waarschuwing over toekomstige SDK-vereisen — dat is geen afkeuring en de build werkt gewoon in TestFlight.
 
 De build werkt met Xcode 26 (iOS 26 SDK, verplicht voor App Store-uploads); de workflow draait op de `macos-26`-runner — die kan druk zijn, dus een langere queue is normaal.
+
+## TestFlight-troubleshooting: "build verschijnt niet"
+
+De upload via `altool` is geslaagd, maar de build is nog niet zichtbaar voor testers. Loop deze checklist na:
+
+1. **Verwerkingstijd**: Apple heeft na een geslaagde upload doorgaans 2–10 minuten nodig (soms langer). Controleer **App Store Connect → Mijn apps → Pluk → TestFlight-tab → iOS → versie 1.0**: daar staan álle builds met hun status (In behandeling / Klaar om te testen / Ontbrekende conformiteit).
+2. **E-mail van App Store Connect**: Apple mailt na verwerking óf een bevestiging ("App Store Connect: ...is ready for testing") óf problemen. Geen mail en na een uur nog niets in ASC → zoek het Apple ID-wachtwoord-/ASC-probleem in de workflowlog.
+3. **"Missing Compliance" (ontbrekende exportconformiteit)**: de build staat dan wél in de lijst maar is niet "Ready to Test". Klik op de build → **Compliance** → beantwoord de encryptievraag met "Nee" (de app gebruikt alleen standaard HTTPS) → opslaan. Vanaf de volgende build zit `ITSAppUsesNonExemptEncryption: false` in de app zelf (zie `project.yml`), waardoor deze vraag niet meer komt.
+4. **Testers**: zelfs een "Ready to Test"-build verschijnt alleen in de TestFlight-app bij testers die in een groep zitten waaraan de build is gekoppeld. Nieuwe builds hangen automatisch aan de groepen van dezelfde app-versie; controleer anders **TestFlight → groep → +** naast de build.
+5. **Goede plek om te kijken**: de **web-ASC** (appstoreconnect.apple.com) is duidelijker dan de TestFlight-app zelf — de TestFlight-app toont alleen "Ready to Test"-builds.
