@@ -19,6 +19,11 @@ final class PantryStore: ObservableObject {
     var removeFromList: ((String) -> Void)?
 
     init(inMemory: Bool = false) throws {
+        if !inMemory {
+            // Zorg dat Application Support bestaat voordat SwiftData er default.store aanmaakt.
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            try? FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+        }
         let configuration = ModelConfiguration(isStoredInMemoryOnly: inMemory)
         container = try ModelContainer(for: PantryItem.self, configurations: configuration)
         context = ModelContext(container)
