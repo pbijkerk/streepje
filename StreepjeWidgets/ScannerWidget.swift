@@ -51,6 +51,6 @@ struct ScannerWidget: Widget {
         }
         .configurationDisplayName("Scan")
         .description("Open direct de streepjescodescanner.")
-        .supportedFamilies([.accessoryInline, .accessoryCircular, .accessoryCorner])
+        .supportedFamilies([.accessoryInline, .accessoryCircular])
     }
 }
