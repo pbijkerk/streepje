@@ -5,6 +5,7 @@ import Foundation
 /// Regels uit de review op issue #2: niets gaat verloren. Elk bestaand lijstitem krijgt
 /// een pantry-item met neutrale defaults (voorraad 1, drempel 1, standaard aanvulling 1).
 /// De migratie is idempotent: items die al in de voorraad zitten worden overgeslagen.
+@MainActor
 enum PantryMigration {
 
     static func run(items: [ShoppingItem], into store: PantryStore) {
