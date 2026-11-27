@@ -210,6 +210,7 @@ struct ProductCard: View {
     .environmentObject(AppState())
 }
 
+@MainActor
 private func makePreviewPantry() -> PantryStore {
     let store = try! PantryStore(inMemory: true)
     store.addProduct(barcode: "8710398723456", name: "Hagelslag puur", category: .grains, quantity: 2, threshold: 2, defaultStock: 3)
