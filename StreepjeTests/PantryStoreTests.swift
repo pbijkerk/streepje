@@ -84,6 +84,74 @@ final class PantryStoreTests: XCTestCase {
         XCTAssertEqual(removed, ["111"])
     }
 
+    func testSetCategoryUpdatesCategory() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk", category: .dairy)
+
+        store.setCategory(item, to: .produce)
+
+        XCTAssertEqual(item.category, .produce)
+        XCTAssertEqual(store.item(withBarcode: "111")?.category, .produce, "Wijziging is opgeslagen")
+    }
+
+    func testRestockPurchasedCreatesPantryItemForUnknownBarcode() throws {
+        let store = try makeStore()
+
+        let item = store.restockPurchased(barcode: "999", name: "Afwasmiddel")
+
+        XCTAssertEqual(store.count, 1)
+        XCTAssertEqual(item.name, "Afwasmiddel")
+        XCTAssertEqual(item.quantity, 1, "Aangemaakt en meteen aangevuld naar de standaard voorraad")
+        XCTAssertNil(item.lowSince)
+    }
+
+    func testRestockPurchasedCreatesPantryItemForEmptyBarcode() throws {
+        let store = try makeStore()
+
+        let item = store.restockPurchased(barcode: "", name: "Knäckebröd")
+
+        XCTAssertFalse(item.barcode.isEmpty, "Lege barcode krijgt een synthetische code i.v.m. .unique")
+        XCTAssertTrue(item.barcode.hasPrefix("manual-"))
+        XCTAssertEqual(store.count, 1)
+    }
+
+    func testRestockPurchasedRestocksLowItemAndRemovesFromList() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk", quantity: 1, threshold: 1)
+        store.consume(item) // laag → automatisch op de lijst
+        XCTAssertEqual(store.listContains?("111"), true)
+
+        store.restockPurchased(barcode: "111", name: "Melk")
+
+        XCTAssertEqual(item.quantity, 1)
+        XCTAssertNil(item.lowSince)
+        XCTAssertEqual(store.listContains?("111"), false, "Lijstregel is weggehaald")
+    }
+
+    func testRestockPurchasedRemovesListEntryEvenWithoutLowStatus() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk", quantity: 3, threshold: 1)
+        XCTAssertNil(item.lowSince)
+        store.addToList = { _, _, _ in } // alsof de regel handmatig op de lijst staat
+        var removed: [String] = []
+        store.removeFromList = { removed.append($0) }
+
+        store.restockPurchased(barcode: "111", name: "Melk")
+
+        XCTAssertEqual(removed, ["111"], "Afvinken in de winkel haalt de regel altijd van de lijst")
+        XCTAssertEqual(item.quantity, 3, "Voorraad was al boven de standaard: niet verlagen")
+    }
+
+    func testDeleteRemovesItem() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk")
+
+        store.delete(item)
+
+        XCTAssertEqual(store.count, 0)
+        XCTAssertNil(store.item(withBarcode: "111"))
+    }
+
     func testIncreaseClearsLowStatus() throws {
         let store = try makeStore()
         let item = store.addProduct(barcode: "111", name: "Melk", quantity: 1, threshold: 1)

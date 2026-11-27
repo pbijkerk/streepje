@@ -100,6 +100,18 @@ final class PantryStore: ObservableObject {
         save()
     }
 
+    /// Verwijdert een voorraadproduct definitief.
+    func delete(_ item: PantryItem) {
+        context.delete(item)
+        save()
+    }
+
+    /// Hercategoriseren (long-press in de inventaris).
+    func setCategory(_ item: PantryItem, to category: PantryCategory) {
+        item.category = category
+        save()
+    }
+
     /// Expliciet aanvullen ("Aanvullen in voorraad"): reset naar de standaard hoeveelheid
     /// en verwijdert de boodschappenlijstregel.
     func restock(_ item: PantryItem) {
@@ -115,6 +127,28 @@ final class PantryStore: ObservableObject {
             removeFromList?(barcode)
         }
         save()
+    }
+
+    /// Terugboek-flow vanuit de boodschappenlijst ("Aanvullen in voorraad"): gekochte
+    /// artikelen worden in één tik teruggeboekt naar de voorraadkast en gereset naar de
+    /// standaard aanvulhoeveelheid.
+    ///
+    /// Bestaat het product nog niet in de voorraad (bijv. puur handmatige lijstregel of
+    /// lege barcode), dan wordt het alsnog als voorraadproduct aangemaakt.
+    @discardableResult
+    func restockPurchased(barcode: String, name: String) -> PantryItem {
+        let item = item(withBarcode: barcode) ?? addProduct(
+            barcode: barcode.isEmpty ? "manual-\(UUID().uuidString)" : barcode,
+            name: name,
+            quantity: 0,
+            threshold: 1,
+            defaultStock: 1
+        )
+        restock(item)
+        // De boodschappenlijstregel moet sowieso weg, ook als het pantry-item niet
+        // de laag-status had (dan verwijdert restock zelf niets).
+        removeFromList?(barcode)
+        return item
     }
 
     private func applyMutation(_ item: PantryItem, newQuantity: Int) {

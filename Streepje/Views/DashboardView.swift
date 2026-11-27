@@ -55,7 +55,13 @@ struct DashboardView: View {
             }
             .navigationTitle("Voorraad")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink {
+                        InventoryView(category: nil)
+                    } label: {
+                        Image(systemName: "square.grid.2x2")
+                    }
+                    .accessibilityLabel("Inventaris")
                     Button {
                         isShowingAddSheet = true
                     } label: {
@@ -129,7 +135,7 @@ struct DashboardView: View {
             }
         }
         .navigationDestination(for: PantryCategory.self) { category in
-            CategoryView(category: category)
+            InventoryView(category: category)
         }
     }
 
@@ -166,34 +172,6 @@ struct ChipView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background(color.opacity(0.15), in: Capsule())
-    }
-}
-
-/// Eenvoudige categorie-inventaris (fase 3 breidt dit uit met productkaarten).
-struct CategoryView: View {
-    @EnvironmentObject var pantry: PantryStore
-    let category: PantryCategory
-
-    var body: some View {
-        List {
-            let items = pantry.items.filter { $0.category == category }
-            if items.isEmpty {
-                ContentUnavailableView("Niets op voorraad", systemImage: category.icon)
-                    .listRowBackground(Color.clear)
-            } else {
-                ForEach(items) { item in
-                    StockRow(item: item) {
-                        Haptics.light()
-                        pantry.increase(item)
-                    } onDecrease: {
-                        Haptics.light()
-                        pantry.consume(item)
-                    }
-                }
-            }
-        }
-        .navigationTitle(category.label)
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

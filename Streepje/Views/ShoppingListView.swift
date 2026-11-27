@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 struct ShoppingListView: View {
     @EnvironmentObject var list: ShoppingListStore
+    @EnvironmentObject var pantry: PantryStore
     @State private var isScanning = false
     @State private var isNamingProduct = false
     @State private var pendingBarcode: String?
@@ -85,6 +86,9 @@ struct ShoppingListView: View {
 
     private var itemsList: some View {
         List {
+            if list.items.contains(where: \.isChecked) {
+                terugboekSection
+            }
             ForEach(list.items) { item in
                 ListItemRow(item: item) {
                     list.toggle(item)
@@ -97,6 +101,32 @@ struct ShoppingListView: View {
             .onDelete { offsets in
                 list.delete(at: offsets)
             }
+        }
+    }
+
+    /// Terugboek-flow (fase 3): aangevinkte artikelen in één tik terugboeken naar de
+    /// voorraadkast en van de lijst halen.
+    private var terugboekSection: some View {
+        Section {
+            Button {
+                restockChecked()
+            } label: {
+                Label("Aanvullen in voorraad (\(aangevinkteCount))", systemImage: "cabinet.fill")
+                    .font(.subheadline.weight(.semibold))
+            }
+        } footer: {
+            Text("Gekochte artikelen worden teruggeboekt naar de voorraad en reset naar hun standaard aanvulhoeveelheid.")
+        }
+    }
+
+    private var aangevinkteCount: Int {
+        list.items.filter(\.isChecked).count
+    }
+
+    private func restockChecked() {
+        Haptics.light()
+        for item in list.items where item.isChecked {
+            pantry.restockPurchased(barcode: item.barcode, name: item.name)
         }
     }
 
@@ -146,4 +176,5 @@ private struct ScannerSheet: View {
         .environmentObject(ShoppingListStore(seedItems: [
             ShoppingItem(barcode: "8710398723456", name: "Hagelslag puur")
         ]))
+        .environmentObject(try! PantryStore(inMemory: true))
 }
