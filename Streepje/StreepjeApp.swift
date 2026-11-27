@@ -17,23 +17,26 @@ struct StreepjeApp: App {
         } catch {
             fatalError("Kan de voorraaddatabase niet openen: \(error)")
         }
-        listStore = ShoppingListStore()
+        let list = ShoppingListStore()
 
-        // Koppel de voorraad-motor aan de boodschappenlijst.
+        // Koppel de voorraad-motor aan de boodschappenlijst (via lokale constanten,
+        // zodat de escaping closures niet naar self verwijzen).
         pantry.listContains = { barcode in
-            listStore.items.contains { $0.barcode == barcode }
+            list.items.contains { $0.barcode == barcode }
         }
         pantry.addToList = { barcode, name, _ in
-            listStore.add(barcode: barcode, name: name)
+            list.add(barcode: barcode, name: name)
         }
         pantry.removeFromList = { barcode in
-            listStore.remove(barcode: barcode)
+            list.remove(barcode: barcode)
         }
 
         // Eenmalige migratie: bestaande boodschappenlijst → voorraad-items (idempotent).
         if !isTesting {
-            PantryMigration.run(items: listStore.items, into: pantry)
+            PantryMigration.run(items: list.items, into: pantry)
         }
+
+        self.listStore = list
     }
 
     var body: some Scene {
