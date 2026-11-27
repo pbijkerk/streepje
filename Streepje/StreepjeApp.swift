@@ -5,6 +5,8 @@ import SwiftUI
 struct StreepjeApp: App {
 
     private let pantry: PantryStore
+    private let listStore: ShoppingListStore
+    @StateObject private var appState = AppState()
 
     init() {
         let isTesting = NSClassFromString("XCTestCase") != nil
@@ -15,15 +17,31 @@ struct StreepjeApp: App {
         } catch {
             fatalError("Kan de voorraaddatabase niet openen: \(error)")
         }
+        listStore = ShoppingListStore()
+
+        // Koppel de voorraad-motor aan de boodschappenlijst.
+        pantry.listContains = { barcode in
+            listStore.items.contains { $0.barcode == barcode }
+        }
+        pantry.addToList = { barcode, name, _ in
+            listStore.add(barcode: barcode, name: name)
+        }
+        pantry.removeFromList = { barcode in
+            listStore.remove(barcode: barcode)
+        }
+
         // Eenmalige migratie: bestaande boodschappenlijst → voorraad-items (idempotent).
         if !isTesting {
-            PantryMigration.run(items: ShoppingListStore().items, into: pantry)
+            PantryMigration.run(items: listStore.items, into: pantry)
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
+                .environmentObject(pantry)
+                .environmentObject(listStore)
+                .environmentObject(appState)
                 .modelContainer(pantry.container)
         }
     }

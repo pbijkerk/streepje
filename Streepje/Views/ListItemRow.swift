@@ -20,7 +20,9 @@ struct ListItemRow: View {
                     .font(.body)
                     .strikethrough(item.isChecked)
                     .foregroundStyle(item.isChecked ? Color.secondary : Color.primary)
-                if !item.barcode.isEmpty {
+                // Alleen echte (numerieke) streepjescodes tonen, geen synthetische
+                // manual-/legacy-codes.
+                if !item.barcode.isEmpty, item.barcode.allSatisfy(\.isNumber) {
                     Text(item.barcode)
                         .font(.caption)
                         .foregroundStyle(.tertiary)

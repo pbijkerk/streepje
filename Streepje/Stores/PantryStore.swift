@@ -18,6 +18,9 @@ final class PantryStore: ObservableObject {
     /// Verwijdert het item met deze barcode van de boodschappenlijst.
     var removeFromList: ((String) -> Void)?
 
+    /// Spiegel van de database voor de UI (SwiftData-updates triggeren vanzelf publicatie).
+    @Published private(set) var items: [PantryItem] = []
+
     init(inMemory: Bool = false) throws {
         if !inMemory {
             // Zorg dat Application Support bestaat voordat SwiftData er default.store aanmaakt.
@@ -28,6 +31,11 @@ final class PantryStore: ObservableObject {
         container = try ModelContainer(for: PantryItem.self, configurations: configuration)
         context = ModelContext(container)
         context.autosaveEnabled = false
+        reload()
+    }
+
+    private func reload() {
+        items = allItems(sortedByName: true)
     }
 
     // MARK: - Ophalen
@@ -70,6 +78,7 @@ final class PantryStore: ObservableObject {
             defaultStock: defaultStock
         )
         context.insert(item)
+        reload()
         return item
     }
 
@@ -126,9 +135,11 @@ final class PantryStore: ObservableObject {
             addToList?(barcode, name, reason)
         }
         save()
+        reload()
     }
 
     func save() {
         try? context.save()
+        reload()
     }
 }

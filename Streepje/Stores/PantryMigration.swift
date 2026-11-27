@@ -10,9 +10,12 @@ enum PantryMigration {
 
     static func run(items: [ShoppingItem], into store: PantryStore) {
         for item in items {
-            guard store.item(withBarcode: item.barcode) == nil else { continue }
+            // Handmatig toegevoegde producten hebben een lege barcode; die botst met
+            // @Attribute(.unique). Geef ze een synthetische, stabiele barcode.
+            let barcode = item.barcode.isEmpty ? "legacy-\(item.id.uuidString)" : item.barcode
+            guard store.item(withBarcode: barcode) == nil else { continue }
             store.addProduct(
-                barcode: item.barcode,
+                barcode: barcode,
                 name: item.name,
                 category: .household,
                 quantity: 1,

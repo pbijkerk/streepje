@@ -36,6 +36,23 @@ final class PantryMigrationTests: XCTestCase {
         XCTAssertEqual(store.item(withBarcode: "8710398723456")?.quantity, 5, "Bestaand item blijft onaangetast")
     }
 
+    func testMigrationHandlesManualItemsWithoutBarcode() throws {
+        let store = try PantryStore(inMemory: true)
+        // Handmatig toegevoegde producten hebben een lege barcode.
+        let legacy = [
+            ShoppingItem(barcode: "", name: "Knäckebr\u00f6d"),
+            ShoppingItem(barcode: "", name: "Balsamico")
+        ]
+
+        PantryMigration.run(items: legacy, into: store)
+
+        XCTAssertEqual(store.count, 2, "Beide handmatige producten krijgen een eigen pantry-item")
+        // Elke barcodes moet uniek en niet-leeg zijn.
+        let barcodes = store.allItems().map(\.barcode)
+        XCTAssertEqual(Set(barcodes).count, 2)
+        XCTAssertTrue(barcodes.allSatisfy { !$0.isEmpty && $0.hasPrefix("legacy-") })
+    }
+
     func testMigrationWithEmptyListDoesNothing() throws {
         let store = try PantryStore(inMemory: true)
 
