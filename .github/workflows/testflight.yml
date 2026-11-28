@@ -65,10 +65,6 @@ jobs:
 
       - name: Lees profielnamen af en toon metadata (diagnose)
         run: |
-          APP_PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' $RUNNER_TEMP/BUILD_PROVISION_PROFILE_BASE64.mobileprovision)
-          WIDGET_PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' $RUNNER_TEMP/WIDGET_PROVISION_PROFILE_BASE64.mobileprovision)
-          echo "APP_PROFILE_NAME=$APP_PROFILE_NAME" >> $GITHUB_ENV
-          echo "WIDGET_PROFILE_NAME=$WIDGET_PROFILE_NAME" >> $GITHUB_ENV
           for VARNAME in BUILD_PROVISION_PROFILE_BASE64 WIDGET_PROVISION_PROFILE_BASE64; do
             PLIST=$RUNNER_TEMP/$VARNAME.plist
             security cms -D -i $RUNNER_TEMP/$VARNAME.mobileprovision > $PLIST
@@ -81,6 +77,10 @@ jobs:
               $PLIST
             /usr/libexec/PlistBuddy -c 'Print :Entitlements' $PLIST
           done
+          APP_PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' $RUNNER_TEMP/BUILD_PROVISION_PROFILE_BASE64.plist)
+          WIDGET_PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' $RUNNER_TEMP/WIDGET_PROVISION_PROFILE_BASE64.plist)
+          echo "APP_PROFILE_NAME=$APP_PROFILE_NAME" >> $GITHUB_ENV
+          echo "WIDGET_PROFILE_NAME=$WIDGET_PROFILE_NAME" >> $GITHUB_ENV
 
       - name: Write App Store Connect API key
         env:
