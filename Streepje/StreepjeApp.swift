@@ -49,6 +49,9 @@ struct StreepjeApp: App {
     /// 2. expliciet on-disk zonder CloudKit
     /// 3. in-memory (noodgeval: app start, data is dan tijdelijk)
     private static func openPantryStore(inTesting isTesting: Bool) -> (store: PantryStore, fout: String?) {
+        var eersteFout = ""
+        var tweedeFout = ""
+
         do {
             // Onder XCTest (hosted unit tests) geen on-disk database en geen CloudKit:
             // de test-sandbox staat geen writes buiten de test toe.
@@ -58,7 +61,7 @@ struct StreepjeApp: App {
             )
             return (store, nil)
         } catch {
-            let eersteFout = "\(error)"
+            eersteFout = "\(error)"
             log.error("Database met CloudKit-configuratie mislukt: \(eersteFout, privacy: .public)")
         }
 
@@ -66,7 +69,7 @@ struct StreepjeApp: App {
             let store = try PantryStore(inMemory: isTesting)
             return (store, "CloudKit niet beschikbaar, doorgaan met lokale opslag: \(eersteFout)")
         } catch {
-            let tweedeFout = "\(error)"
+            tweedeFout = "\(error)"
             log.error("Ook lokale opslag mislukt: \(tweedeFout, privacy: .public)")
         }
 
