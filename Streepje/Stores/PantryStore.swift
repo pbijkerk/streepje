@@ -39,18 +39,42 @@ final class PantryStore: ObservableObject {
         if let cloudKitContainerID, !inMemory {
             let cloudConfiguration = ModelConfiguration(cloudKitDatabase: .private(cloudKitContainerID))
             do {
-                container = try ModelContainer(for: PantryItem.self, configurations: cloudConfiguration)
+                container = try Self.makeContainer(cloudConfiguration)
             } catch {
                 // CloudKit niet beschikbaar → lokale opslag; de app werkt gewoon door.
-                container = try ModelContainer(for: PantryItem.self, configurations: makeLocalConfiguration())
+                container = try Self.makeContainer(makeLocalConfiguration())
             }
         } else {
-            container = try ModelContainer(for: PantryItem.self, configurations: makeLocalConfiguration())
+            container = try Self.makeContainer(makeLocalConfiguration())
         }
 
         context = ModelContext(container)
         context.autosaveEnabled = false
         reload()
+    }
+
+    /// Maakt de container; opent de bestaande database dat niet (bijv. een databestand
+    /// van een ouder schema), dan wordt het oude bestand als back-up opzij gezet en
+    /// wordt opnieuw geprobeerd met een schone database.
+    private static func makeContainer(_ configuration: ModelConfiguration) throws -> ModelContainer {
+        do {
+            return try ModelContainer(for: PantryItem.self, configurations: configuration)
+        } catch {
+            backupExistingStore()
+            return try ModelContainer(for: PantryItem.self, configurations: configuration)
+        }
+    }
+
+    /// Zet bestaande store-bestanden (default.store + WAL/SHM) opzij als back-up.
+    private static func backupExistingStore() {
+        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        for suffix in ["", "-wal", "-shm"] {
+            let url = appSupport.appendingPathComponent("default.store" + suffix)
+            guard FileManager.default.fileExists(atPath: url.path) else { continue }
+            let backup = appSupport.appendingPathComponent("default.store" + suffix + ".oude-schema-backup")
+            try? FileManager.default.removeItem(at: backup)
+            try? FileManager.default.moveItem(at: url, to: backup)
+        }
     }
 
     private func reload() {
