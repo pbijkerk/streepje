@@ -8,6 +8,7 @@ struct DashboardView: View {
     @EnvironmentObject var appState: AppState
 
     @State private var isShowingAddSheet = false
+    @State private var isScanning = false
 
     var body: some View {
         NavigationStack {
@@ -63,12 +64,20 @@ struct DashboardView: View {
                     }
                     .accessibilityLabel("Inventaris")
                     Button {
+                        isScanning = true
+                    } label: {
+                        Image(systemName: "barcode.viewfinder")
+                    }
+                    .accessibilityLabel("Scannen en inboeken in voorraad")
+                    Button {
                         isShowingAddSheet = true
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
             }
+            // Scannen = inboeken in de voorraad (issue #8).
+            .scanToBookIn(isScanning: $isScanning)
             .sheet(isPresented: $isShowingAddSheet) {
                 AddStockSheet()
             }
