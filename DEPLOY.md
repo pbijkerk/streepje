@@ -105,7 +105,7 @@ De TestFlight-upload faalt totdat dit klaar is (de app heeft nu iCloud- en push-
 4. **Widget-provisioning profile aanmaken**: Profiles → **+** → App Store Connect → App ID `nl.pbijkerk.streepje.widgets` → certificaat Apple Distribution → naam bijv. `Streepje Widgets App Store` → downloaden → base64 → zet in **twee nieuwe secrets**:
    - `WIDGET_PROVISION_PROFILE_BASE64` (de base64 van het profile)
    - `WIDGET_PROVISION_PROFILE_SPECIFIER` (de **naam**, bijv. `Streepje Widgets App Store`)
-5. De workflow installeert beide profiles en geeft ze per bundle ID mee (`-provisioningProfiles`).
+5. De workflow installeert beide profiles en koppelt ze per target via build settings (`APP_PP_SPECIFIER` / `WIDGET_PP_SPECIFIER`, alleen Release).
 
 Base64 maken:
 ```bash
