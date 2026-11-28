@@ -94,3 +94,20 @@ De app zoekt bij het starten de CloudKit-container `iCloud.nl.pbijkerk.streepje`
 4. **Testen**: log op twee apparaten (of simulator + toestel) in met hetzelfde Apple ID; nieuwe voorraadproducten verschijnen vanzelf op het andere apparaat (kan enkele seconden tot minuten duren; bij de eerste sync ook een paar minuten).
 
 Let op: met CloudKit verviel het `.unique`-attribuut op de barcode. Dubbele producten worden in de app zelf voorkomen (check vóór het inserten); mocht er via sync ooit een dubbel ontstaan, dan worden ze naast elkaar getoond — geen dataverlies.
+
+## Fase 5b: provisioning voor de widget + vernieuwd app-profile
+
+De TestFlight-upload faalt totdat dit klaar is (de app heeft nu iCloud- en push-entitlements, en de widget-extensie heeft een eigen provisioning profile nodig):
+
+1. **App ID bijwerken**: developer.apple.com → Identifiers → `nl.pbijkerk.streepje` → vink aan: **iCloud (CloudKit, container `iCloud.nl.pbijkerk.streepje`)** én **Push Notifications** (CloudKit gebruikt stille pushes voor snelle sync).
+2. **Widget App ID aanmaken**: Identifiers → **+** → App IDs → App → beschrijving "Streepje Widgets", **Explicit** Bundle ID: `nl.pbijkerk.streepje.widgets`. Extra capabilities niet nodig.
+3. **App-provisioning profile vernieuwen**: Profiles → het bestaande App Store-profile → **Edit** → opnieuw genereren → downloaden → base64 → vervang secret `BUILD_PROVISION_PROFILE_BASE64`.
+4. **Widget-provisioning profile aanmaken**: Profiles → **+** → App Store Connect → App ID `nl.pbijkerk.streepje.widgets` → certificaat Apple Distribution → naam bijv. `Streepje Widgets App Store` → downloaden → base64 → zet in **twee nieuwe secrets**:
+   - `WIDGET_PROVISION_PROFILE_BASE64` (de base64 van het profile)
+   - `WIDGET_PROVISION_PROFILE_SPECIFIER` (de **naam**, bijv. `Streepje Widgets App Store`)
+5. De workflow installeert beide profiles en geeft ze per bundle ID mee (`-provisioningProfiles`).
+
+Base64 maken:
+```bash
+base64 -i ~/Downloads/naam.mobileprovision | pbcopy
+```
