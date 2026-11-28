@@ -142,6 +142,50 @@ final class PantryStoreTests: XCTestCase {
         XCTAssertEqual(item.quantity, 3, "Voorraad was al boven de standaard: niet verlagen")
     }
 
+    // MARK: - Scan-flow (issue #8)
+
+    func testBookInNewProductCreatesPantryItem() throws {
+        let store = try makeStore()
+
+        let item = store.bookIn(barcode: "8710398723456", name: "Hagelslag puur")
+
+        XCTAssertEqual(store.count, 1)
+        XCTAssertEqual(item.quantity, 1, "Gescand nieuw product wordt met voorraad 1 ingeboekt")
+        XCTAssertEqual(item.threshold, 1)
+        XCTAssertEqual(store.listContains?("8710398723456"), false, "Scannen voegt NIET toe aan de boodschappenlijst")
+    }
+
+    func testBookInExistingProductIncreasesStock() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk", quantity: 2, threshold: 1)
+
+        store.bookIn(barcode: "111", name: "Melk")
+
+        XCTAssertEqual(item.quantity, 3)
+        XCTAssertEqual(store.count, 1)
+    }
+
+    func testBookInProductOnShoppingListRestocksAndRemovesFromList() throws {
+        let store = try makeStore()
+        let item = store.addProduct(barcode: "111", name: "Melk", quantity: 1, threshold: 2, defaultStock: 4)
+        store.consume(item) // laag → automatisch op de lijst
+        XCTAssertEqual(store.listContains?("111"), true)
+
+        store.bookIn(barcode: "111", name: "Melk")
+
+        XCTAssertEqual(item.quantity, 4, "Uitpakken van iets gekochts vult aan naar de standaardhoeveelheid")
+        XCTAssertEqual(store.listContains?("111"), false, "Het item verdwijnt van de boodschappenlijst")
+    }
+
+    func testBookInWithEmptyBarcodeGetsSyntheticCode() throws {
+        let store = try makeStore()
+
+        let item = store.bookIn(barcode: "", name: "Knäckebröd")
+
+        XCTAssertTrue(item.barcode.hasPrefix("manual-"))
+        XCTAssertEqual(store.count, 1)
+    }
+
     func testDeleteRemovesItem() throws {
         let store = try makeStore()
         let item = store.addProduct(barcode: "111", name: "Melk")

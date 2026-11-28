@@ -7,7 +7,6 @@ struct ShoppingListView: View {
     @EnvironmentObject var appState: AppState
     @State private var isScanning = false
     @State private var isNamingProduct = false
-    @State private var pendingBarcode: String?
     @State private var productNameInput = ""
     @State private var toonKopieerBevestiging = false
     @State private var exportFout: String?
@@ -22,10 +21,11 @@ struct ShoppingListView: View {
                 }
             }
             .navigationTitle("Lijst")
-            // Deep link van de Lock Screen-widget: streepje://scan
+            // Deep link van de Lock Screen-widget: streepje://scan — scannen hoort bij
+            // de voorraad, dus open de scanner op de Voorraad-tab (issue #8).
             .onOpenURL { url in
                 guard url.scheme == "streepje" else { return }
-                appState.selectedTab = .lijst
+                appState.selectedTab = .voorraad
                 isScanning = true
             }
             .alert("Gekopieerd", isPresented: $toonKopieerBevestiging) {
@@ -52,44 +52,37 @@ struct ShoppingListView: View {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     exportMenu
                     Button {
-                        pendingBarcode = nil
                         productNameInput = ""
                         isNamingProduct = true
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Handmatig product op de lijst zetten")
                     Button {
                         isScanning = true
                     } label: {
                         Image(systemName: "barcode.viewfinder")
                     }
+                    .accessibilityLabel("Scannen en inboeken in voorraad")
                 }
             }
-            .sheet(isPresented: $isScanning) {
-                ScannerSheet { code in
-                    isScanning = false
-                    handleScan(code)
-                }
-                .presentationDetents([.large])
-            }
-            .alert(onbekendTitel, isPresented: $isNamingProduct) {
+            // Scan boekt in de voorraad in (issue #8); de handmatige + knop zet
+            // wél een regel op de boodschappenlijst.
+            .scanToBookIn(isScanning: $isScanning)
+            .alert("Nieuw product", isPresented: $isNamingProduct) {
                 TextField("Productnaam", text: $productNameInput)
-                Button("Opslaan") {
+                Button("Op de lijst") {
                     let name = productNameInput.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if let barcode = pendingBarcode, !name.isEmpty {
-                        list.add(barcode: barcode, name: name)
-                    } else if pendingBarcode == nil, !name.isEmpty {
+                    if !name.isEmpty {
                         list.add(barcode: "", name: name)
                     }
-                    pendingBarcode = nil
                     productNameInput = ""
                 }
                 Button("Annuleren", role: .cancel) {
-                    pendingBarcode = nil
                     productNameInput = ""
                 }
             } message: {
-                Text("Deze code staat niet in de productdatabase. Vul zelf een naam in.")
+                Text("Zet een product zonder streepjescode op de boodschappenlijst. Wil je het in de voorraad? Gebruik dan de scan- of +-knop op het Voorraad-scherm.")
             }
         }
     }
@@ -135,10 +128,6 @@ struct ShoppingListView: View {
         } catch {
             exportFout = error.localizedDescription
         }
-    }
-
-    private var onbekendTitel: String {
-        pendingBarcode == nil ? "Nieuw product" : "Code niet gevonden"
     }
 
     private var emptyState: some View {
@@ -193,46 +182,6 @@ struct ShoppingListView: View {
         Haptics.light()
         for item in list.items where item.isChecked {
             pantry.restockPurchased(barcode: item.barcode, name: item.name)
-        }
-    }
-
-    private func handleScan(_ code: String) {
-        if let cached = ProductLookup.cachedName(for: code) {
-            list.add(barcode: code, name: cached)
-            return
-        }
-
-        Task {
-            if let name = await ProductLookup.name(for: code) {
-                list.add(barcode: code, name: name)
-            } else {
-                pendingBarcode = code
-                productNameInput = ""
-                isNamingProduct = true
-            }
-        }
-    }
-}
-
-private struct ScannerSheet: View {
-    var onScan: (String) -> Void
-
-    var body: some View {
-        ZStack(alignment: .top) {
-            BarcodeScannerView { code in
-                onScan(code)
-            }
-            .ignoresSafeArea()
-
-            VStack(spacing: 8) {
-                Text("Richt de camera op een streepjescode")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(.black.opacity(0.6), in: Capsule())
-            }
-            .padding(.top, 8)
         }
     }
 }

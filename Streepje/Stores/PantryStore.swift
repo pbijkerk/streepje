@@ -194,6 +194,33 @@ final class PantryStore: ObservableObject {
         return item
     }
 
+    /// Scan-flow (issue #8): een gescand product wordt in de **voorraad** ingeboekt,
+    /// niet op de boodschappenlijst.
+    ///
+    /// - Nieuw product → voorraaditem met voorraad 1, drempel 1, standaard aanvulling 1.
+    /// - Bestaand product op de boodschappenlijst (uitpakken van iets gekochts) →
+    ///   aanvullen naar de standaardhoeveelheid en van de lijst halen.
+    /// - Bestaand product dat niet op de lijst staat → voorraad +1.
+    @discardableResult
+    func bookIn(barcode: String, name: String) -> PantryItem {
+        let code = barcode.isEmpty ? "manual-\(UUID().uuidString)" : barcode
+        guard let item = item(withBarcode: code) else {
+            return addProduct(
+                barcode: code,
+                name: name,
+                quantity: 1,
+                threshold: 1,
+                defaultStock: 1
+            )
+        }
+        if listContains?(code) == true {
+            restockPurchased(barcode: code, name: name)
+        } else {
+            increase(item)
+        }
+        return item
+    }
+
     private func applyMutation(_ item: PantryItem, newQuantity: Int) {
         let mutation = StockMutation(
             barcode: item.barcode,
