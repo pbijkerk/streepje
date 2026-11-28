@@ -65,6 +65,21 @@ jobs:
             cp $PP_PATH "$PP_DIR/$UUID.mobileprovision"
           done
 
+      - name: Toon profiel-metadata (diagnose)
+        run: |
+          for VARNAME in BUILD_PROVISION_PROFILE_BASE64 WIDGET_PROVISION_PROFILE_BASE64; do
+            PLIST=$RUNNER_TEMP/$VARNAME.plist
+            security cms -D -i $RUNNER_TEMP/$VARNAME.mobileprovision > $PLIST
+            echo "--- $VARNAME ---"
+            /usr/libexec/PlistBuddy \
+              -c 'Print :Name' \
+              -c 'Print :UUID' \
+              -c 'Print :TeamIdentifier:0' \
+              -c 'Print :ExpirationDate' \
+              $PLIST
+            /usr/libexec/PlistBuddy -c 'Print :Entitlements' $PLIST
+          done
+
       - name: Write App Store Connect API key
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
