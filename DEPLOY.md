@@ -60,9 +60,11 @@ Zet in **GitHub → Settings → Secrets and variables → Actions** (delen van 
 | `ASC_KEY_P8_BASE64` | Base64 van het `.p8`-bestand |
 | `BUILD_CERT_P12_BASE64` | Base64 van het `.p12`-certificaat |
 | `BUILD_CERT_PASSWORD` | Het wachtwoord van het `.p12`-bestand |
-| `BUILD_PROVISION_PROFILE_BASE64` | Base64 van het provisioning profile |
-| `PROVISIONING_PROFILE_SPECIFIER` | De **naam** van het profile (bijv. `Streepje App Store`) |
+| `BUILD_PROVISION_PROFILE_BASE64` | Base64 van het provisioning profile van de app |
+| `WIDGET_PROVISION_PROFILE_BASE64` | Base64 van het provisioning profile van de widget-extensie |
 | `DEVELOPMENT_TEAM_ID` | Je 10-tekens Team ID (developer.apple.com → Membership) |
+
+De workflow leest de profielnamen (Name) zelf af uit de geüploade profiles — er is dus géén apart secret nodig met de profielnaam.
 
 ## Daarna
 
@@ -102,10 +104,8 @@ De TestFlight-upload faalt totdat dit klaar is (de app heeft nu iCloud- en push-
 1. **App ID bijwerken**: developer.apple.com → Identifiers → `nl.pbijkerk.streepje` → vink aan: **iCloud (CloudKit, container `iCloud.nl.pbijkerk.streepje`)** én **Push Notifications** (CloudKit gebruikt stille pushes voor snelle sync).
 2. **Widget App ID aanmaken**: Identifiers → **+** → App IDs → App → beschrijving "Streepje Widgets", **Explicit** Bundle ID: `nl.pbijkerk.streepje.widgets`. Extra capabilities niet nodig.
 3. **App-provisioning profile vernieuwen**: Profiles → het bestaande App Store-profile → **Edit** → opnieuw genereren → downloaden → base64 → vervang secret `BUILD_PROVISION_PROFILE_BASE64`.
-4. **Widget-provisioning profile aanmaken**: Profiles → **+** → App Store Connect → App ID `nl.pbijkerk.streepje.widgets` → certificaat Apple Distribution → naam bijv. `Streepje Widgets App Store` → downloaden → base64 → zet in **twee nieuwe secrets**:
-   - `WIDGET_PROVISION_PROFILE_BASE64` (de base64 van het profile)
-   - `WIDGET_PROVISION_PROFILE_SPECIFIER` (de **naam**, bijv. `Streepje Widgets App Store`)
-5. De workflow installeert beide profiles en koppelt ze per target via build settings (`APP_PP_SPECIFIER` / `WIDGET_PP_SPECIFIER`, alleen Release).
+4. **Widget-provisioning profile aanmaken**: Profiles → **+** → App Store Connect → App ID `nl.pbijkerk.streepje.widgets` → certificaat Apple Distribution → downloaden → base64 → zet in secret `WIDGET_PROVISION_PROFILE_BASE64`.
+5. De workflow installeert beide profiles, leest hun namen af en koppelt ze per target via build settings (`APP_PP_SPECIFIER` / `WIDGET_PP_SPECIFIER`, alleen Release).
 
 Base64 maken:
 ```bash
