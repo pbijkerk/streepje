@@ -4,6 +4,7 @@ import SwiftUI
 struct ShoppingListView: View {
     @EnvironmentObject var list: ShoppingListStore
     @EnvironmentObject var pantry: PantryStore
+    @EnvironmentObject var appState: AppState
     @State private var isScanning = false
     @State private var isNamingProduct = false
     @State private var pendingBarcode: String?
@@ -21,6 +22,12 @@ struct ShoppingListView: View {
                 }
             }
             .navigationTitle("Lijst")
+            // Deep link van de Lock Screen-widget: streepje://scan
+            .onOpenURL { url in
+                guard url.scheme == "streepje" else { return }
+                appState.selectedTab = .lijst
+                isScanning = true
+            }
             .alert("Gekopieerd", isPresented: $toonKopieerBevestiging) {
                 Button("OK", role: .cancel) {}
             } message: {
@@ -236,4 +243,5 @@ private struct ScannerSheet: View {
             ShoppingItem(barcode: "8710398723456", name: "Hagelslag puur")
         ]))
         .environmentObject(try! PantryStore(inMemory: true))
+        .environmentObject(AppState())
 }

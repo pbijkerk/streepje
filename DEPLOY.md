@@ -83,3 +83,14 @@ De upload via `altool` is geslaagd, maar de build is nog niet zichtbaar voor tes
 3. **"Missing Compliance" (ontbrekende exportconformiteit)**: de build staat dan wél in de lijst maar is niet "Ready to Test". Klik op de build → **Compliance** → beantwoord de encryptievraag met "Nee" (de app gebruikt alleen standaard HTTPS) → opslaan. Vanaf de volgende build zit `ITSAppUsesNonExemptEncryption: false` in de app zelf (zie `project.yml`), waardoor deze vraag niet meer komt.
 4. **Testers**: zelfs een "Ready to Test"-build verschijnt alleen in de TestFlight-app bij testers die in een groep zitten waaraan de build is gekoppeld. Nieuwe builds hangen automatisch aan de groepen van dezelfde app-versie; controleer anders **TestFlight → groep → +** naast de build.
 5. **Goede plek om te kijken**: de **web-ASC** (appstoreconnect.apple.com) is duidelijker dan de TestFlight-app zelf — de TestFlight-app toont alleen "Ready to Test"-builds.
+
+## Fase 5: iCloud-sync (eenmalige instellingen)
+
+De app zoekt bij het starten de CloudKit-container `iCloud.nl.pbijkerk.streepje`. Zolang de onderstaande stappen niet gedaan zijn, valt de app netjes terug op lokale opslag (niets crasht), maar er synchroniseert niets.
+
+1. **iCloud-capability op het App ID**: developer.apple.com → Certificates, IDs & Profiles → Identifiers → `nl.pbijkerk.streepje` → Capability **iCloud** aanvinken (inclusief **CloudKit**) en container `iCloud.nl.pbijkerk.streepje` aanmaken/koppelen. Push notifications (aps) meestand laten.
+2. **Provisioning profile opnieuw genereren**: het bestaande App Store-profile bevat de iCloud-capability niet. Maak het profile opnieuw aan (of bewerkt het zodat iCloud erin zit), download het, en zet de base64 in het secret `BUILD_PROVISION_PROFILE_BASE64` (vervang de waarde). Zonder deze stap faalt de TestFlight-upload met een entitlement-mismatch.
+3. **CloudKit-container** verschijnt automatisch in de CloudKit Console zodra de eerste build met de entitlement draait.
+4. **Testen**: log op twee apparaten (of simulator + toestel) in met hetzelfde Apple ID; nieuwe voorraadproducten verschijnen vanzelf op het andere apparaat (kan enkele seconden tot minuten duren; bij de eerste sync ook een paar minuten).
+
+Let op: met CloudKit verviel het `.unique`-attribuut op de barcode. Dubbele producten worden in de app zelf voorkomen (check vóór het inserten); mocht er via sync ooit een dubbel ontstaan, dan worden ze naast elkaar getoond — geen dataverlies.

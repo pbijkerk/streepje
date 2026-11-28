@@ -8,12 +8,18 @@ struct StreepjeApp: App {
     private let listStore: ShoppingListStore
     @StateObject private var appState = AppState()
 
+    /// CloudKit-container voor privé-database-sync (fase 5).
+    private static let cloudKitContainerID = "iCloud.nl.pbijkerk.streepje"
+
     init() {
         let isTesting = NSClassFromString("XCTestCase") != nil
         do {
-            // Onder XCTest (hosted unit tests) geen on-disk database: de test-sandbox
-            // staat geen writes buiten de test toe.
-            pantry = try PantryStore(inMemory: isTesting)
+            // Onder XCTest (hosted unit tests) geen on-disk database en geen CloudKit:
+            // de test-sandbox staat geen writes buiten de test toe.
+            pantry = try PantryStore(
+                inMemory: isTesting,
+                cloudKitContainerID: isTesting ? nil : Self.cloudKitContainerID
+            )
         } catch {
             fatalError("Kan de voorraaddatabase niet openen: \(error)")
         }

@@ -21,14 +21,33 @@ final class PantryStore: ObservableObject {
     /// Spiegel van de database voor de UI (SwiftData-updates triggeren vanzelf publicatie).
     @Published private(set) var items: [PantryItem] = []
 
-    init(inMemory: Bool = false) throws {
-        if !inMemory {
-            // Zorg dat Application Support bestaat voordat SwiftData er default.store aanmaakt.
-            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            try? FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+    /// - Parameters:
+    ///   - inMemory: alleen in geheugen (tests).
+    ///   - cloudKitContainerID: CloudKit-container voor privé-database-sync. Wordt de
+    ///     container niet beschikbaar (geen entitlement, geen iCloud-account), dan valt
+    ///     de store terug op lokale opslag — de app blijft gewoon werken.
+    init(inMemory: Bool = false, cloudKitContainerID: String? = nil) throws {
+        func makeLocalConfiguration() -> ModelConfiguration {
+            if !inMemory {
+                // Zorg dat Application Support bestaat voordat SwiftData er default.store aanmaakt.
+                let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                try? FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+            }
+            return ModelConfiguration(isStoredInMemoryOnly: inMemory)
         }
-        let configuration = ModelConfiguration(isStoredInMemoryOnly: inMemory)
-        container = try ModelContainer(for: PantryItem.self, configurations: configuration)
+
+        if let cloudKitContainerID, !inMemory {
+            let cloudConfiguration = ModelConfiguration(cloudKitDatabase: .private(cloudKitContainerID))
+            do {
+                container = try ModelContainer(for: PantryItem.self, configurations: cloudConfiguration)
+            } catch {
+                // CloudKit niet beschikbaar → lokale opslag; de app werkt gewoon door.
+                container = try ModelContainer(for: PantryItem.self, configurations: makeLocalConfiguration())
+            }
+        } else {
+            container = try ModelContainer(for: PantryItem.self, configurations: makeLocalConfiguration())
+        }
+
         context = ModelContext(container)
         context.autosaveEnabled = false
         reload()
