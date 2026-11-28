@@ -115,7 +115,8 @@ jobs:
             -scheme Streepje \
             -destination 'generic/platform=iOS' \
             -archivePath $RUNNER_TEMP/Streepje.xcarchive \
-            -provisioningProfiles "nl.pbijkerk.streepje=$PROVISIONING_PROFILE_SPECIFIER" "nl.pbijkerk.streepje.widgets=$WIDGET_PROVISION_PROFILE_SPECIFIER" \
+            APP_PP_SPECIFIER="$PROVISIONING_PROFILE_SPECIFIER" \
+            WIDGET_PP_SPECIFIER="$WIDGET_PROVISION_PROFILE_SPECIFIER" \
             DEVELOPMENT_TEAM=$DEVELOPMENT_TEAM_ID \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \

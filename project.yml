@@ -39,6 +39,9 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          PROVISIONING_PROFILE_SPECIFIER: $(APP_PP_SPECIFIER)
   StreepjeWidgets:
     type: app-extension
     platform: iOS
@@ -54,6 +57,9 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: nl.pbijkerk.streepje.widgets
         SKIP_INSTALL: YES
+      configs:
+        Release:
+          PROVISIONING_PROFILE_SPECIFIER: $(WIDGET_PP_SPECIFIER)
   StreepjeTests:
     type: bundle.unit-test
     platform: iOS
